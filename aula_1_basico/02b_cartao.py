@@ -3,16 +3,16 @@
 import flet as ft
 
 def main(page: ft.Page):
-    # Título que aparece na barra da janela/aba
+    # Título da Janela
     page.title = "Perfil"
 
-    # Cor de fundo da página inteira: azul marinho escuro
+    # Cor de fundo
     page.bgcolor = "#0D1B2A"
 
-    # Centraliza os controles no eixo horizontal da página
+    # Centraliza os controles
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
-    # Padding vertical de 60px (topo e base)
+    # Padding
     page.padding = ft.Padding(top=60, bottom=60, left=0, right=0)
 
     page.add(
@@ -36,7 +36,7 @@ def main(page: ft.Page):
                         alignment=ft.MainAxisAlignment.CENTER,
                         controls=[
                             ft.Icon(ft.Icons.EMAIL, color="#48CAE4"),
-                            ft.Text("leo@email.com", color="#E0FBFC"),
+                            ft.Text("leonardo@email.com", color="#E0FBFC"),
                         ],
                     ),
 

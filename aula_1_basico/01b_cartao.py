@@ -28,7 +28,7 @@ def main(page: ft.Page):
             text_align=ft.TextAlign.CENTER,
         ),
         ft.Text( # Outra palavra
-            "Drogaria Leão que eu gosto de montão!",
+            "Drogaria Leão que eu Gosto de Montão!",
             size=14,
             color="#EDA0A0",
             text_align=ft.TextAlign.CENTER,

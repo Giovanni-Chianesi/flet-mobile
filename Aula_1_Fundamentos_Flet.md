@@ -277,7 +277,67 @@ Usando `Row` com vários `Container` dentro (cada um representando um produto co
 
 # Fazer código com Professor
 
+# Grade de Produtos
 
+import flet as ft
+
+def card_produto(nome, preco):
+    return ft.Container(
+        width=140,
+        height=140,
+        padding=12,
+        bgcolor="#FFF3E0",  # Cor de fundo do cartão
+        border_radius=12,
+        content=ft.Column(
+            alignment=ft.MainAxisAlignment.CENTER,  # Centraliza o conteúdo verticalmente
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # Centraliza horizontalmente
+            controls=[
+                ft.Icon(ft.Icons.SHOPPING_BAG, size=32, color="#E65100"),  # Ícone
+                ft.Text(nome, weight=ft.FontWeight.BOLD, color="#4E342E"),  # Nome
+                ft.Text(f"R$ {preco:.2f}", color="#6D4C41"),  # Preço
+            ],
+        ),
+    )
+
+def main(page: ft.Page):
+    # Título da Janela
+    page.title = "Prateleira"
+
+    # Cor de fundo da página inteira
+    page.bgcolor = "#2E1A47"
+
+    # Centraliza os controles
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    # Define o tamanho da tela
+    page.window.width = 320
+    page.window.height = 600
+
+    # Padding
+    page.padding = ft.Padding(top=60, right=0, bottom=0, left=0)
+
+    # Tupla
+    produtos = [
+        ("Caneta", 3.5),
+        ("Caderno", 12.9),
+        ("Mochila", 89.9),
+        ("Estojo", 24.9),
+        ("Régua", 5.0),
+        ("Borracha", 2.5),
+    ]
+
+    page.add(
+        ft.Row(
+            scroll=ft.ScrollMode.AUTO,
+            #scroll=ft.ScrollMode.HIDDEN,  # permite rolar horizontalmente, mas esconde a barra de rolagem
+            alignment=ft.MainAxisAlignment.CENTER,  # centraliza os cartões na linha
+            # Gera um card_produto para cada item da lista de produtos
+            controls=[card_produto(nome, preco) for nome, preco in produtos],
+        )
+    )
+
+# Inicia a aplicação, chamando a função main() como ponto de entrada
+ft.run(main)
 
 ```
 
@@ -302,7 +362,74 @@ Todo controle interativo tem um `on_<evento>` — o mais comuns são `on_click` 
 
 # Fazer código com Professor
 
+# Formulário
 
+import flet as ft
+
+def main(page: ft.Page):
+    # Título na Janela
+    page.title = "Formulário Simples"
+
+    # Cor de fundo da página
+    page.bgcolor = "#EAF4F4"
+
+    # Padding 
+    page.padding = ft.Padding(top=60, bottom=60, left=0, right=0)
+
+    # Campo de texto para o nome
+    nome = ft.TextField(
+        label="Seu nome",
+        width=280,  # Largura do campo
+        color="#2D3142", # Cor do texto
+        label_style=ft.TextStyle(color="#6B7B8C"),
+        border_color="#A9C5C6", # Cor da borda
+        focused_border_color= "#5FA8A0",
+    )
+
+    # CheckBox de aceite dos termos
+    aceite = ft.Checkbox(
+        label="Aceito os termos",
+        check_color="#FFFFFF", # Cor do check (visto)
+        active_color="#5FA8A0", # Cor do check (quando marcado)
+        label_style=ft.TextStyle(color="#2D3142"), # Cor do label ("Aceito os termos")
+    )
+
+    resultado = ft.Text(color="#3E7C7C") # Texto de resultado (Após enviar)
+
+    def enviar(e):
+        # Função de envio dos dados com validações
+        if not nome.value:
+            nome.error_text = "Preencha seu nome"
+            page.update()
+            return
+        nome.error_text = None
+        resultado.value = f"Obrigado, {nome.value}!" if aceite.value else "Você precisa aceitar os termos."
+        page.update()
+
+    # Construção dos elementos
+    page.add(
+        ft.Column(
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                nome, # Campo nome
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[aceite], # CheckBox (Caixa para marcar ou não)
+                ),
+                # Botão "Enviar"
+                ft.ElevatedButton(
+                    "Enviar",
+                    on_click=enviar, # Ao clicar chama a função enviar
+                    bgcolor="#5FA8A0",
+                    color="#FFFFFF",
+                ),
+                # Exibição dos resultados
+                resultado,
+            ],
+        )
+    )
+
+ft.run(main)
 
 ```
 
@@ -413,7 +540,75 @@ Um clássico para fixar `on_click` + `page.update()`: um `ft.Text` mostrando um 
 
 # Fazer código com Professor
 
+import flet as ft
 
+def main(page: ft.Page):
+    
+    # Título da Janela
+    page.title = "Contador"
+    
+    # Cor de fundo 
+    page.bgcolor="#3D0E0E"
+    
+    # Define tamanho da Janela
+    page.window.width = 320
+    page.window.height = 600
+    
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    
+    # Texto que exibe o valor atual
+    page.padding= ft.Padding(top=60, bottom=60, left=0, right=0)
+    
+    contador = ft.Text("0", size=40, color="#FF6B6B", weight=ft.FontWeight.BOLD)
+    
+    # Váriavel para guardar a contagem
+    valor=0
+    
+    # Funcionalidades
+    def somar(e):
+        # Uso do "nonlocal para dizer ao Python: quero alterar o valor da váriavel "valor" que foi criada na função
+        # "main" sem ter que criar a váriavel
+        nonlocal valor
+        valor +=1 # Atualização do contador (Mesmo que: "valor = valor + 1" )
+        contador.value = str(valor)
+        page.update()
+        
+    def subtrair(e):
+        nonlocal valor
+        valor -=1 # Atualização do contador (Mesmo que: "valor = valor - 1" )
+        contador.value = str(valor)
+        page.update()
+        
+    def resetar(e):
+        nonlocal valor
+        valor = 0 # Zera a váriavel
+        contador.value = str(valor)
+        page.update()
+        
+    # Montagem da página do app
+    page.add(
+        ft.Row(
+            alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                ft.IconButton(ft.Icons.REMOVE, on_click=subtrair, icon_color="#FF6B6B"),
+                contador,
+                ft.IconButton(ft.Icons.ADD, on_click=somar, icon_color="#FF6B6B"),
+            ],
+        ),
+        ft.Row(
+            alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                ft.TextButton(
+                    "resetar",
+                    icon=ft.Icons.RESTART_ALT,
+                    on_click=resetar,
+                    style=ft.ButtonStyle(color="#FFB4B4"),
+                ),
+            ],
+        ),
+    )
+
+ft.run(main)
 
 ```
 
