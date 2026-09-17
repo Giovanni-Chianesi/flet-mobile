@@ -635,7 +635,70 @@ Boas práticas:
 
 # Fazer código com Professor
 
+# Mudança do Estado da Page Light/Dark
 
+import flet as ft
+
+def main(page: ft.Page):
+    # Configs Iniciais
+    page.title="Modo Claro/Escuro"
+    page.theme_mode = ft.ThemeMode.LIGHT # Inicia o modo Claro
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER # Centraliza Tudo
+    
+    # Função que redesenha toda a tela se o tema for trocado
+    def construir_tela():
+        page.controls.clear() # Limpa a tela antes de recriar o app
+        
+        escuro = page.theme_mode == ft.ThemeMode.DARK # Modo Dark
+        
+        # Define o ícone cores e texto de acordo com o tema atual
+        icone = ft.Icon(
+            ft.Icons.LIGHT_MODE if escuro else ft.Icons.DARK_MODE,
+            size=60,
+            color=ft.Colors.AMBER if escuro else ft.Colors.BLUE_200,
+        )
+        text = ft.Text(
+            "Modo Escuro ativado" if escuro else "Modo Claro Ativado",
+            size=20,
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.WHITE if escuro else ft.Colors.BLACK,
+        )
+        botao = ft.ElevatedButton(
+            "Ativar Modo Claro" if escuro else "Ativar Modo Escuro",
+            on_click=alternar_tema,
+        )
+        
+        # Cor de fundo da tela
+        page.bgcolor = ft.Colors.BLACK if escuro else ft.Colors.WHITE
+        
+        # Adiciona os elementos centralizados
+        page.add(
+            ft.Column(
+                [ft.Container(height=60), icone, text, botao],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=20,
+            )
+        )
+        
+        page.update()
+        
+    def alternar_tema(e):
+        page.theme_mode = (
+            ft.ThemeMode.DARK if page.theme_mode == ft.ThemeMode.LIGHT else ft.ThemeMode.LIGHT
+        )
+        
+        # Forma tradicional
+        # if page.theme_mode == ft.ThemeMode.LIGHT:
+        #     page.theme_mode = ft.ThemeMoed.DARK
+        # else:
+        #     page.theme_mode = ft.ThemeMode.LIGHT
+        
+        construir_tela() # Usado toda vez que usuário clicar para reconstruir
+    construir_tela() # Chama a tela pela primeira vez
+    
+# Inicia o aplicativo
+ft.app(target=main)
 
 ```
 
@@ -646,16 +709,19 @@ Crie 5 `IconButton` (`ft.Icons.STAR_BORDER` / `ft.Icons.STAR`) em uma `Row`, rep
 **Solução:**
 
 ```python
+
+# Sistema de Avaliação de Estrelas estilo Uber
+
 import flet as ft
 
 def main(page: ft.Page):
-    # Título que aparece na barra da janela/aba
+    # Título da janela
     page.title = "Avaliação"
 
-    # Cor de fundo da página inteira: marrom escuro (combina bem com dourado das estrelas)
+    # Cor de fundo da página 
     page.bgcolor = "#2B2118"
 
-    # Centraliza os controles no eixo horizontal da página
+    # Centraliza
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
     # Padding vertical de 60px (topo e base)
@@ -687,6 +753,7 @@ def main(page: ft.Page):
     )
 
 ft.run(main)
+
 ```
 
 > Repare que `avaliar(indice)` **devolve uma função** — é o mesmo truque do card de produto (Bloco 4), agora aplicado a eventos: cada botão precisa "lembrar" seu próprio índice, e uma função geradora resolve isso (voltaremos a esse ponto no próximo bloco).
@@ -711,7 +778,84 @@ Uma tela de lista (tarefas, produtos, mensagens...) segue sempre o mesmo roteiro
 
 # Fazer código com Professor
 
+# Lista de Tarefas
 
+import flet as ft
+
+def main(page: ft.Page):
+    # Título da janela
+    page.title = "Lista de Compras"
+
+    # Cor de fundo da página 
+    page.bgcolor = "#0F2E1D"
+
+    # Centraliza tudo
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+
+    # Padding vertical de 60px (topo e base)
+    page.padding = ft.Padding(top=60, bottom=60, left=0, right=0)
+
+    # Local para guardar os itens da lista
+    itens = ["Leitex", "Pão", "Café"]
+    
+    # Rolagem vertical (Se a lista for grande)
+    list_view = ft.ListView(expand=True, spacing=8, width=320)
+    
+    # Campo de texto para adicionar novos itens (Na lista de tarefas)
+    campo = ft.TextField(
+        label="Novo item",
+        expand=True,
+        color="#ffffff",
+        label_style=ft.TextStyle(color="#8FD9B6"),
+        border_color="#3F8F6C",
+        focused_border_color="#5FE0A0",
+    )
+    
+    def build_item(nome):
+        # Função que recebe nome e devolve 1 linha com a tarefe pronta
+        def remover(e):
+            itens.remove(nome)
+            atualizar_lista()
+        return ft.Row(
+            controls=[
+                ft.Text(nome, expand=True, color="#E5F5EC"),
+                ft.IconButton(ft.Icons.DELETE, on_click=remover, icon_color="#FF8A8A")
+            ]
+        )
+        
+    def atualizar_lista():
+        # Limpa e reconstrói a ListView.
+        list_view.controls.clear()
+        for nome in itens:
+            list_view.controls.append(build_item(nome))
+        page.update()
+        
+    def adicionar(e):
+        # Função para efetivamente inserir uma nova tarefa
+        if campo.value:
+            itens.append(campo.value)
+            campo.value=""
+            atualizar_lista()
+            
+    # Construção do Layout da Tela
+    page.add(
+        ft.Row(
+            width=320,
+            # Campo para inserir uma nova tarefa + Botão de adicionar
+            controls=[
+                campo,
+                ft.ElevatedButton(
+                    "Adicionar", on_click=adicionar, bgcolor="#5FE0A0", color="#0F2E1D"
+                ),
+            ],
+        ),
+        # Exibe a lista de todas as tarefas
+        list_view
+    )
+    atualizar_lista() # Constrói a lista inicial (Ao abrir)
+    
+# Roda a aplicação
+ft.run(main)
 
 ```
 
@@ -825,7 +969,58 @@ O padrão recomendado é sempre **reconstruir `page.views` a partir de `page.rou
 
 # Fazer código com Professor
 
+# Transição de Telas Simples
 
+import flet as ft
+
+def main(page: ft.Page):
+    # Título que aparece na Janela
+    page.title = "Navegação"
+    
+    def view_inicio():
+        return ft.View(
+            route='/', # Rota da página principal
+            appbar=ft.AppBar(title=ft.Text("Início")),
+            bgcolor="#221A3D",
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            padding = ft.Padding(top=60, bottom=60, left=0, right=0),
+            controls=[
+                ft.Text("Tela inicial", color="#C9B6F2", size=18),
+                ft.ElevatedButton(
+                    "Ir para Sobre",
+                    # "lambda" -> Forma rápida de criar uma função de uma única linha
+                    # Isso porque o "on_click" espera receber uma função
+                    on_click=lambda e: page.navigate("/sobre"),
+                    bgcolor="#9B7EDE",
+                    color="#221A3D"
+                ),
+            ],
+        )
+    def view_sobre():
+        return ft.View(
+            route='/sobre', # Rota da página sobre
+            appbar=ft.AppBar(title=ft.Text("Sobre")),
+            bgcolor="#1A2E3D",
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            padding = ft.Padding(top=60, bottom=60, left=0, right=0),
+            controls=[ft.Text("Esta é a tela sobre", color="#9FD3E8")],
+        )
+    def route_change(e):
+        # Reconstrói a iugoslavia
+        page.views.clear()
+        page.views.append(view_inicio())
+        if page.route == "/sobre":
+            page.views.append(view_sobre())
+        page.update()
+    def view_pop(e):
+        page.views.pop()
+        page.navigate(page.views[-1].route)
+        
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    route_change(None) # Constrói a view da rota inicial
+    
+ft.run(main)
 
 ```
 
@@ -847,10 +1042,13 @@ Crie duas telas: `"/"` com um `TextField` (nome) e um botão "Entrar" que navega
 **Solução:**
 
 ```python
+
+# Janela de Boas-Vindas
+
 import flet as ft
 
 def main(page: ft.Page):
-    # Título que aparece na barra da janela/aba
+    # Título que aparece na Janela
     page.title = "Login"
 
     # Campo de nome compartilhado entre as chamadas de view_login()
@@ -870,7 +1068,7 @@ def main(page: ft.Page):
         return ft.View(
             route="/",
             appbar=ft.AppBar(title=ft.Text("Login")),
-            bgcolor="#2E1F14",  # cor de fundo desta tela: marrom escuro
+            bgcolor="#2E1F14",  # cor de fundo
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza o formulário
             padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
             controls=[
@@ -885,7 +1083,7 @@ def main(page: ft.Page):
         return ft.View(
             route=f"/boas-vindas/{nome}",
             appbar=ft.AppBar(title=ft.Text("Boas-vindas")),
-            bgcolor="#142E2A",  # cor de fundo desta tela: verde-azulado escuro
+            bgcolor="#142E2A",  # cor de fundo 
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza a mensagem
             padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
             controls=[
@@ -916,6 +1114,7 @@ def main(page: ft.Page):
     route_change(None)
 
 ft.run(main)
+
 ```
 
 ---
@@ -930,13 +1129,16 @@ ft.run(main)
 - **`ft.NavigationBar`**: barra inferior com "abas" (ex.: Início/Busca/Perfil), definida em `page.navigation_bar` e com evento `on_change`.
 
 ```python
+
+# Navbar "Deseja sair?"
+
 import flet as ft
 
 def main(page: ft.Page):
-    # Título que aparece na barra da janela/aba
+    # Título que aparece na Janela
     page.title = "Diálogos"
 
-    # Cor de fundo da página: vinho/marsala escuro
+    # Cor de fundo da página
     page.bgcolor = "#3D0F1E"
 
     # Centraliza o botão na página
@@ -968,6 +1170,7 @@ def main(page: ft.Page):
     )
 
 ft.run(main)
+
 ```
 
 ---
@@ -1006,24 +1209,27 @@ PRIORITY_COLOR = {"alta": "#FF6B6B", "media": "#F2C94C", "baixa": "#6FCF97"}
 ### Código completo
 
 ```python
+
+# Lista de Tarefa Avançada
+
 import flet as ft
 
-# Cores de prioridade (usadas na "bolinha" e no texto de detalhe)
+# Cores de prioridade
 PRIORITY_COLOR = {"alta": "#FF6B6B", "media": "#F2C94C", "baixa": "#6FCF97"}
 PRIORITY_LABEL = {"alta": "Alta", "media": "Média", "baixa": "Baixa"}
 
-# Cores de fundo, uma para cada tela do app (paleta azul/roxa escura, consistente entre telas)
+# Cores de fundo, uma para cada tela do app 
 BG_LISTA = "#161B33"
 BG_NOVA = "#241B3D"
 BG_DETALHE = "#1B2E3D"
-BG_DESTAQUE = "#5C7CFA"  # cor de destaque (botões, ícones) usada nas 3 telas
+BG_DESTAQUE = "#5C7CFA"  # cor de destaque (botões, ícones)
 
 
 def main(page: ft.Page):
-    # Título que aparece na barra da janela/aba
+    # Título que aparece na Janela
     page.title = "App de Tarefas"
 
-    # Dados iniciais: fonte de verdade das tarefas
+    # Dados iniciais
     tasks: list[dict] = [
         {"id": 1, "title": "Estudar Flet", "description": "Terminar os mini-exercícios da Aula 1.",
          "priority": "alta", "done": False},
@@ -1032,7 +1238,7 @@ def main(page: ft.Page):
     ]
     next_id = [3]  # lista de 1 elemento, para incrementar sem precisar de "nonlocal"
 
-    # ---------- Tela: Lista de tarefas ----------
+    # Tela: Lista de tarefas 
     def build_task_row(t: dict) -> ft.Container:
         # Função "builder": recebe a tarefa e devolve a linha pronta (evita closure tardio)
         def ir_para_detalhe(e):
@@ -1072,7 +1278,7 @@ def main(page: ft.Page):
         return ft.View(
             route="/",
             appbar=ft.AppBar(title=ft.Text("Minhas Tarefas")),
-            bgcolor=BG_LISTA,  # cor de fundo desta tela
+            bgcolor=BG_LISTA,  # cor de fundo 
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza a lista
             padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
             controls=[lista_view],
@@ -1081,7 +1287,7 @@ def main(page: ft.Page):
             ),
         )
 
-    # ---------- Tela: Nova tarefa ----------
+    # Tela: Nova tarefa 
     def view_nova() -> ft.View:
         titulo = ft.TextField(
             label="Título", width=300, color="#FFFFFF",
@@ -1136,7 +1342,7 @@ def main(page: ft.Page):
             )
             next_id[0] += 1
             page.navigate("/")
-            page.show_dialog(ft.SnackBar(ft.Text("Tarefa criada com sucesso!")))
+            page.show_dialog(ft.SnackBar(ft.Text("Tarefa criada com sucessox!")))
 
         return ft.View(
             route="/nova",
@@ -1155,7 +1361,7 @@ def main(page: ft.Page):
             ],
         )
 
-    # ---------- Tela: Detalhe da tarefa ----------
+    # Tela: Detalhe da tarefa 
     def view_detalhe(task_id: int) -> ft.View:
         tarefa = next((t for t in tasks if t["id"] == task_id), None)
 
@@ -1190,8 +1396,8 @@ def main(page: ft.Page):
         return ft.View(
             route=f"/tarefa/{task_id}",
             appbar=ft.AppBar(title=ft.Text("Detalhe da tarefa")),
-            bgcolor=BG_DETALHE,  # cor de fundo desta tela
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza o conteúdo do detalhe
+            bgcolor=BG_DETALHE,  # cor de fundo 
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza o conteúdo
             padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
             controls=[
                 ft.Text(tarefa["title"], size=24, weight=ft.FontWeight.BOLD, color="#D6E8F0"),
@@ -1217,7 +1423,7 @@ def main(page: ft.Page):
             ],
         )
 
-    # ---------- Roteamento ----------
+    # Roteamento 
     def route_change(e):
         # Reconstrói toda a pilha de views a partir da rota atual
         page.views.clear()
@@ -1242,6 +1448,7 @@ def main(page: ft.Page):
 
 
 ft.run(main)
+
 ```
 
 ### Desafios extras (para quem terminar antes)
@@ -1255,11 +1462,273 @@ ft.run(main)
 
 ```python
 
+# Lista de Tarefa Avançada Extras
+
+import flet as ft
+
+# Cores de prioridade
+PRIORITY_COLOR = {"alta": "#FF6B6B", "media": "#F2C94C", "baixa": "#6FCF97"}
+PRIORITY_LABEL = {"alta": "Alta", "media": "Média", "baixa": "Baixa"}
+
+# Cores de fundo, uma para cada tela do app 
+BG_LISTA = "#161B33"
+BG_NOVA = "#241B3D"
+BG_DETALHE = "#1B2E3D"
+BG_DESTAQUE = "#5C7CFA"  # cor de destaque (botões, ícones)
 
 
-# Tente/pesquise como implementar os extras
+def main(page: ft.Page):
+    # Título que aparece na Janela
+    page.title = "App de Tarefas"
+
+    # Dados iniciais
+    tasks: list[dict] = [
+        {"id": 1, "title": "Estudar Flet", "description": "Terminar os mini-exercícios da Aula 1.",
+         "priority": "alta", "done": False},
+        {"id": 2, "title": "Revisar POO em Python", "description": "Classes, atributos e métodos.",
+         "priority": "media", "done": False},
+    ]
+    next_id = [3]  # lista de 1 elemento, para incrementar sem precisar de "nonlocal"
+
+    # Tela: Lista de tarefas 
+    def build_task_row(t: dict) -> ft.Container:
+        # Função "builder": recebe a tarefa e devolve a linha pronta (evita closure tardio)
+        def ir_para_detalhe(e):
+            page.navigate(f"/tarefa/{t['id']}")
+
+        def alternar_concluida(e):
+            t["done"] = e.control.value
+            page.update()
+
+        # Título com cor apagada quando a tarefa está concluída
+        titulo = ft.Text(
+            t["title"],
+            expand=True,
+            color="#6E7695" if t["done"] else "#E9ECFB",
+        )
+
+        return ft.Container(
+            padding=12,
+            border_radius=10,
+            bgcolor="#232A4D",  # cor de fundo de cada linha de tarefa
+            content=ft.Row(
+                controls=[
+                    ft.Checkbox(value=t["done"], on_change=alternar_concluida, active_color=BG_DESTAQUE),
+                    ft.Container(width=10, height=10, border_radius=5, bgcolor=PRIORITY_COLOR[t["priority"]]),
+                    titulo,
+                    ft.Icon(ft.Icons.CHEVRON_RIGHT, color="#8892C4"),
+                ]
+            ),
+            on_click=ir_para_detalhe,
+        )
+
+    def view_lista() -> ft.View:
+        lista_view = ft.ListView(expand=True, spacing=8, width=340)
+        busca = ft.TextField(
+            label="Buscar tarefa",
+            hint_text="Digite o título da tarefa",
+            width=340,
+            color="#FFFFFF",
+            prefix_icon=ft.Icons.SEARCH,
+            label_style=ft.TextStyle(color="#B7A9E0"),
+            border_color="#4A3F7A",
+            focused_border_color=BG_DESTAQUE,
+        )
+
+        def atualizar_lista(e=None):
+            termo = (busca.value or "").strip().casefold()
+            lista_view.controls.clear()
+
+            for t in tasks:
+                if termo in t["title"].casefold():
+                    lista_view.controls.append(build_task_row(t))
+
+            if not lista_view.controls:
+                lista_view.controls.append(
+                    ft.Text("Nenhuma tarefa encontrada.", color="#A9B1D6")
+                )
+
+            page.update()
+
+        busca.on_change = atualizar_lista
+        termo_inicial = (busca.value or "").strip().casefold()
+        for t in tasks:
+            if termo_inicial in t["title"].casefold():
+                lista_view.controls.append(build_task_row(t))
+
+        return ft.View(
+            route="/",
+            appbar=ft.AppBar(title=ft.Text("Minhas Tarefas")),
+            bgcolor=BG_LISTA,  # cor de fundo 
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza a lista
+            padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
+            controls=[busca, lista_view],
+            floating_action_button=ft.FloatingActionButton(
+                icon=ft.Icons.ADD, on_click=lambda e: page.navigate("/nova"), bgcolor=BG_DESTAQUE
+            ),
+        )
+
+    # Tela: Nova tarefa 
+    def view_nova() -> ft.View:
+        titulo = ft.TextField(
+            label="Título", width=300, color="#FFFFFF",
+            label_style=ft.TextStyle(color="#B7A9E0"), border_color="#4A3F7A",
+            focused_border_color=BG_DESTAQUE,
+        )
+        descricao = ft.TextField(
+            label="Descrição", multiline=True, min_lines=3, width=300, color="#FFFFFF",
+            label_style=ft.TextStyle(color="#B7A9E0"), border_color="#4A3F7A",
+            focused_border_color=BG_DESTAQUE,
+        )
+        prioridade = ft.RadioGroup(
+            value="media",
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.CENTER,
+                controls=[
+                    ft.Radio(
+                        value="alta",
+                        label="Alta",
+                        label_style=ft.TextStyle(color="#D8CFF2"),  # cor do texto
+                        fill_color=BG_DESTAQUE,  # cor do círculo (selecionado/borda)
+                    ),
+                    ft.Radio(
+                        value="media",
+                        label="Média",
+                        label_style=ft.TextStyle(color="#D8CFF2"),
+                        fill_color=BG_DESTAQUE,
+                    ),
+                    ft.Radio(
+                        value="baixa",
+                        label="Baixa",
+                        label_style=ft.TextStyle(color="#D8CFF2"),
+                        fill_color=BG_DESTAQUE,
+                    ),
+                ]
+            ),
+        )
+
+        def salvar(e):
+            if not titulo.value:
+                titulo.error_text = "Informe um título"
+                page.update()
+                return
+            tasks.append(
+                {
+                    "id": next_id[0],
+                    "title": titulo.value,
+                    "description": descricao.value or "",
+                    "priority": prioridade.value,
+                    "done": False,
+                }
+            )
+            next_id[0] += 1
+            page.navigate("/")
+            page.show_dialog(ft.SnackBar(ft.Text("Tarefa criada com sucessox!")))
+
+        return ft.View(
+            route="/nova",
+            appbar=ft.AppBar(title=ft.Text("Nova tarefa")),
+            bgcolor=BG_NOVA,  # cor de fundo desta tela
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza o formulário
+            padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
+            controls=[
+                titulo,
+                descricao,
+                ft.Text("Prioridade:", color="#D8CFF2"),
+                prioridade,
+                ft.ElevatedButton(
+                    "Salvar", on_click=salvar, bgcolor=BG_DESTAQUE, color="#161B33"
+                ),
+            ],
+        )
+
+    # Tela: Detalhe da tarefa 
+    def view_detalhe(task_id: int) -> ft.View:
+        tarefa = next((t for t in tasks if t["id"] == task_id), None)
+
+        if tarefa is None:
+            return ft.View(
+                route=f"/tarefa/{task_id}",
+                appbar=ft.AppBar(title=ft.Text("Tarefa não encontrada")),
+                bgcolor=BG_DETALHE,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                padding=ft.Padding(top=60, bottom=60, left=0, right=0),
+                controls=[ft.Text("Essa tarefa não existe (ou já foi excluída).", color="#D6E8F0")],
+            )
+
+        def excluir_confirmado(e):
+            tasks.remove(tarefa)
+            page.pop_dialog()
+            page.navigate("/")
+            page.show_dialog(ft.SnackBar(ft.Text("Tarefa excluída.")))
+
+        def cancelar(e):
+            page.pop_dialog()
+
+        dialogo = ft.AlertDialog(
+            title=ft.Text("Excluir tarefa?"),
+            content=ft.Text("Essa ação não pode ser desfeita."),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cancelar),
+                ft.TextButton("Excluir", on_click=excluir_confirmado),
+            ],
+        )
+
+        return ft.View(
+            route=f"/tarefa/{task_id}",
+            appbar=ft.AppBar(title=ft.Text("Detalhe da tarefa")),
+            bgcolor=BG_DETALHE,  # cor de fundo 
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,  # centraliza o conteúdo
+            padding=ft.Padding(top=60, bottom=60, left=0, right=0),  # padding vertical de 60px
+            controls=[
+                ft.Text(tarefa["title"], size=24, weight=ft.FontWeight.BOLD, color="#D6E8F0"),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,  # centraliza a bolinha + rótulo de prioridade
+                    controls=[
+                        ft.Container(width=12, height=12, border_radius=6, bgcolor=PRIORITY_COLOR[tarefa["priority"]]),
+                        ft.Text(f"Prioridade {PRIORITY_LABEL[tarefa['priority']]}", color="#A9C7D6"),
+                    ]
+                ),
+                ft.Text(
+                    tarefa["description"] or "(sem descrição)",
+                    color="#D6E8F0",
+                    text_align=ft.TextAlign.CENTER,
+                ),
+                ft.ElevatedButton(
+                    "Excluir",
+                    icon=ft.Icons.DELETE,
+                    on_click=lambda e: page.show_dialog(dialogo),
+                    bgcolor="#FF6B6B",
+                    color="#1B2E3D",
+                ),
+            ],
+        )
+
+    # Roteamento 
+    def route_change(e):
+        # Reconstrói toda a pilha de views a partir da rota atual
+        page.views.clear()
+        page.views.append(view_lista())
+
+        if page.route == "/nova":
+            page.views.append(view_nova())
+
+        troute = ft.TemplateRoute(page.route)
+        if troute.match("/tarefa/:id"):
+            page.views.append(view_detalhe(int(troute.id)))
+
+        page.update()
+
+    def view_pop(e):
+        page.views.pop()
+        page.navigate(page.views[-1].route)
+
+    page.on_route_change = route_change
+    page.on_view_pop = view_pop
+    route_change(None)  # constrói a(s) view(s) da rota inicial
 
 
+ft.run(main)
 
 ```
 
